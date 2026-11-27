@@ -52,4 +52,26 @@ if(s.age===16){s.education='SMA/SMK';s.schoolEnrolled=false;s.schoolGrade=0;add(
 if(s.age===18){s.education='Lulus SMA/SMK';s.schoolEnrolled=false;add('Kelulusan','Kamu menyelesaikan SMA/SMK dan bisa memilih kuliah atau bekerja.');}if(s.age===60)s.job='Pensiun';let e=eventText();let title='Peristiwa tahunan';if(Math.random()<.25){s.happiness+=8;title='Kabar baik'}else if(Math.random()<.18){s.money=Math.max(0,s.money-15);title='Pengeluaran tak terduga';e+=' Kamu mengeluarkan 15 koin.'}add(title,e);clamp();save()}
 function resetGame(){if(confirm('Hapus kehidupan yang tersimpan dan mulai baru?')){localStorage.removeItem(key);s=null;location.reload()}}
 if(s){try{render()}catch(e){s=null;try{localStorage.removeItem(key)}catch(_){};document.getElementById('setup').classList.remove('hide');document.getElementById('game').classList.add('hide');alert('Data lama tidak cocok dan telah direset. Silakan mulai lagi.')}}
+</script><script>
+/* NPC Life Upgrade: simulated routines, needs, relationships, and workplace continuity */
+(function(){
+if(!Array.isArray(npcList))return;
+npcList.forEach((n,i)=>{n._life=n._life||{days:0,relationship:Math.floor(25+Math.random()*50),needs:Math.floor(50+Math.random()*40),lastActivity:'Menjalani rutinitas harian'};});
+function activityFor(n){
+ if(n.age<6)return 'Bermain dan tinggal bersama keluarga';
+ if(n.age<18)return 'Belajar di sekolah'+(n.workplace&&n.workplace!=='-'?' • '+n.workplace:'');
+ if(n.workStatus&&/bekerja|kerja/i.test(n.workStatus))return 'Bekerja di '+(n.workplace||'tempat kerja');
+ let h=(n._life.days%24);return h<7?'Tidur dan beristirahat':h<9?'Sarapan dan bersiap':h<17?'Aktivitas harian / bekerja':h<20?'Bersosialisasi':'Bersantai di rumah';
+}
+function tick(){
+ npcList.forEach(n=>{n._life.days++;n.energy=Math.max(10,Math.min(100,(n.energy||70)+((n._life.days%3===0)?8:-4)));n.happiness=Math.max(10,Math.min(100,(n.happiness||60)+(Math.random()<.35?2:-1)));n._life.lastActivity=activityFor(n);});
+}
+window.koiNPCActivity=function(i){let n=npcList[i];return n&&n._life?n._life.lastActivity:'—'};
+const oldAgeUp=window.ageUp;
+if(typeof oldAgeUp==='function')window.ageUp=function(){oldAgeUp();if(!s||s.dead)return;tick();};
+const oldShow=window.showNPC;
+if(typeof oldShow==='function')window.showNPC=function(i){oldShow(i);let n=npcList[i];if(!n)return;let d=document.getElementById('npcDetails');if(d&&!d.innerHTML.includes('Aktivitas saat ini'))d.innerHTML+='<div class="event"><b>Aktivitas saat ini</b><br>'+n._life.lastActivity+'</div><div class="event"><b>Relasi sosial</b><br>'+n._life.relationship+'/100</div><div class="event"><b>Rutinitas</b><br>Hari simulasi ke-'+n._life.days+'</div>';};
+const oldRender=window.render;
+if(typeof oldRender==='function')window.render=function(){oldRender();let g=document.getElementById('npcGallery');if(g&&g.innerHTML){g.querySelectorAll('.npcCard').forEach((card,i)=>{let n=npcList[i];if(n&&n._life){let tag=card.querySelector('small');if(tag)tag.textContent=n._life.lastActivity;}});}};
+})();
 </script></body></html>
