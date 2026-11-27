@@ -68,7 +68,18 @@ function tick(){
 }
 window.koiNPCActivity=function(i){let n=npcList[i];return n&&n._life?n._life.lastActivity:'—'};
 const oldAgeUp=window.ageUp;
-if(typeof oldAgeUp==='function')window.ageUp=function(){oldAgeUp();if(!s||s.dead)return;tick();};
+if(typeof oldAgeUp==='function')window.ageUp=function(){
+ if(!s||s.dead)return;
+ s.month=(s.month||0)+1;
+ if(s.month>=12){s.month=0;oldAgeUp();}
+ if(!s||s.dead)return;
+ tick();
+ let ageEl=document.getElementById('age');
+ if(ageEl)ageEl.textContent=(s.age||0)+' tahun '+(s.month||0)+' bulan';
+ let meta=document.getElementById('meta');
+ if(meta&&s)meta.textContent=s.gender+' • '+s.city+' • '+s.education+' • '+s.month+' bulan';
+ save();
+};
 const oldShow=window.showNPC;
 if(typeof oldShow==='function')window.showNPC=function(i){oldShow(i);let n=npcList[i];if(!n)return;let d=document.getElementById('npcDetails');if(d&&!d.innerHTML.includes('Aktivitas saat ini'))d.innerHTML+='<div class="event"><b>Aktivitas saat ini</b><br>'+n._life.lastActivity+'</div><div class="event"><b>Relasi sosial</b><br>'+n._life.relationship+'/100</div><div class="event"><b>Rutinitas</b><br>Hari simulasi ke-'+n._life.days+'</div>';};
 const oldRender=window.render;
