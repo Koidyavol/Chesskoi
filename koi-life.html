@@ -216,3 +216,12 @@ const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.sc
  const prevRender=window.render;window.render=function(){prevRender();if(!s||!s.schoolEnrolled||!s.schoolName||s.age>=18)return;let box=document.getElementById('careerActions');if(!box)return;let peers=getPeers();box.innerHTML+='<hr><h4>👥 Teman sekolah (warga yang sudah ada)</h4><div class="grid">'+peers.map((p,i)=>'<button class="choice" onclick="talkSchoolNPC('+i+')">'+p.name+'<small> • '+(p.stats?.personality||'NPC')+' • 🤝 '+(p.friendship||0)+'</small></button>').join('')+'</div>';let last=peers.find(p=>p._lastWords);if(last)box.innerHTML+='<div class="event"><b>💬 '+last.name+' berkata:</b><p>'+last._lastWords+'</p></div>';};
 })();
 </script>
+
+<script>
+/* Universal NPC card talk button */
+(function(){
+ const oldShow=window.showNPC;
+ window.showNPC=function(i){oldShow(i);const n=npcList[i];if(!n)return;let f=Number(n.friendship)||0;let choices=['Sapa dan tanyakan kabarnya','Tanyakan tentang aktivitasnya','Bahas hobi atau hal menarik','Tawarkan bantuan ringan'];let html='<hr><h3>💬 Bicara</h3><p>Pertemanan: <b>'+f+'/100</b></p>'+choices.map((x,j)=>'<button class="choice" onclick="talkResident('+i+','+j+')">'+x+'</button>').join('');document.getElementById('npcDetails').innerHTML+=html;};
+ window.talkResident=function(i,j){let n=npcList[i];if(!n)return;if(typeof n.friendship!=='number')n.friendship=0;let gains=[3,2,3,4];n.friendship=Math.min(100,n.friendship+gains[j]);let responses=['Dia menyambut sapaan dan menjawab dengan ramah.','Dia menceritakan sedikit tentang kesehariannya.','Obrolan kalian berlanjut membahas hal yang menarik.','Dia menghargai tawaran bantuanmu.'];let options=['Hai! Apa kabar?','Kegiatan sehari-hari cukup menarik, ya.','Aku suka membahas hal-hal seperti ini.','Terima kasih sudah berbincang!'];n._talkText=responses[j];n._talkPlayer=options[j];add('Percakapan','Kamu berbincang dengan '+n.name+'. Pertemanan +'+gains[j]+'.');save();showNPC(i);};
+})();
+</script>
