@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Life Simulator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#10151d;color:#e8edf5;font:15px system-ui,sans-serif}.wrap{max-width:780px;margin:auto;padding:14px}.panel{background:#1b2431;border:1px solid #334154;border-radius:16px;padding:15px;margin:12px 0}.head{display:flex;justify-content:space-between;align-items:center;gap:10px}.logo{font-size:25px;font-weight:900;letter-spacing:1px;color:#9ad6c0}.muted{color:#9eabbc}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.stat{background:#121a25;padding:10px;border-radius:12px}.meter{height:8px;background:#344253;border-radius:8px;overflow:hidden;margin-top:5px}.fill{height:100%;background:#76c9a8}.btn{border:0;border-radius:11px;padding:11px;background:#83c8a9;color:#102019;font-weight:800;cursor:pointer;margin:3px 0;width:100%}.btn.alt{background:#34465b;color:#fff}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.place{background:#202d3d;border:1px solid #415269;padding:12px;border-radius:12px;text-align:left;cursor:pointer;color:#fff}.place b{display:block;margin-bottom:4px}.log{max-height:250px;overflow:auto;line-height:1.5;background:#111923;padding:12px;border-radius:10px}.row{display:flex;gap:8px}.row>*{flex:1}.hide{display:none}input{width:100%;background:#121a25;color:white;border:1px solid #405168;border-radius:10px;padding:12px}.pill{display:inline-block;background:#263648;padding:5px 9px;border-radius:20px;color:#a8dbc6;font-size:12px}button:disabled{opacity:.4}
+</style></head><body><div class="wrap">
+<div class="panel head"><div><div class="logo">LIFE SIMULATOR</div><small class="muted">Build your own everyday life.</small></div><span class="pill" id="dayTag">Day 1</span></div>
+<section id="setup" class="panel"><h2>Mulai kehidupan baru</h2><label>Nama karakter</label><input id="name" maxlength="20" value="Koi"><label style="display:block;margin-top:12px">Kota tempat tinggal</label><input id="city" maxlength="30" value="Banjarmasin"><button class="btn" onclick="start()">Mulai Hidup</button></section>
+<section id="game" class="hide">
+<div class="panel"><div class="head"><h2 id="hero"></h2><span class="pill" id="jobTag">Belum bekerja</span></div><div class="muted" id="meta"></div><div class="stats" id="stats"></div></div>
+<div class="panel"><h3>📍 Lokasi</h3><div class="grid">
+<button class="place" onclick="visit('Rumah')"><b>🏠 Rumah</b><small>Istirahat dan aktivitas pribadi</small></button>
+<button class="place" onclick="visit('Kota')"><b>🏙️ Pusat Kota</b><small>Jalan-jalan dan belanja</small></button>
+<button class="place" onclick="visit('Pasar')"><b>🛒 Pasar</b><small>Beli kebutuhan</small></button>
+<button class="place" onclick="visit('Taman')"><b>🌳 Taman</b><small>Rekreasi</small></button>
+<button class="place" onclick="visit('Kafe')"><b>☕ Kafe</b><small>Suasana santai</small></button>
+<button class="place" onclick="visit('Kantor')"><b>🏢 Kantor</b><small>Cari kerja / bekerja</small></button>
+</div><div id="placeInfo" class="muted" style="margin-top:10px">Pilih lokasi untuk beraktivitas.</div></div>
+<div class="panel"><h3>Aktivitas</h3><div class="grid">
+<button class="btn" onclick="doAct('sleep')">😴 Tidur</button><button class="btn" onclick="doAct('meal')">🍜 Makan</button>
+<button class="btn alt" onclick="doAct('hobby')">🎮 Hobi</button><button class="btn alt" onclick="doAct('study')">📚 Belajar</button>
+<button class="btn alt" onclick="doAct('work')">💼 Kerja</button><button class="btn alt" onclick="doAct('social')">🧑‍🤝‍🧑 Bersosialisasi</button>
+</div><button class="btn" onclick="nextDay()">🌅 Akhiri Hari</button></div>
+<div class="panel"><h3>🎒 Barang</h3><div id="inventory">Dompet kosong.</div></div>
+<div class="panel"><h3>📖 Catatan kehidupan</h3><div id="log" class="log"></div><button class="btn alt" onclick="resetGame()">Mulai ulang kehidupan</button></div>
+</section></div>
+<script>
+const initial={day:1,name:'',city:'',cash:120,energy:75,hunger:25,mood:70,clean:70,skill:0,job:'Belum bekerja',inv:['Air minum']};
+let s=JSON.parse(localStorage.getItem('lifeSimChesskoi')||'null');
+function save(){localStorage.setItem('lifeSimChesskoi',JSON.stringify(s));render()}
+function start(){s={...initial,name:document.getElementById('name').value.trim()||'Player',city:document.getElementById('city').value.trim()||'Kota',inv:['Air minum']};document.getElementById('setup').classList.add('hide');document.getElementById('game').classList.remove('hide');log('Kamu memulai kehidupan baru di '+s.city+'.');save()}
+function log(t){let l=document.getElementById('log');l.innerHTML='<div>Day '+s.day+' — '+t+'</div>'+l.innerHTML}
+function render(){if(!s)return;document.getElementById('setup').classList.add('hide');document.getElementById('game').classList.remove('hide');document.getElementById('hero').textContent=s.name;document.getElementById('meta').textContent='📍 '+s.city+' • Hari '+s.day+' • 💰 '+s.cash+' koin';document.getElementById('jobTag').textContent=s.job;document.getElementById('dayTag').textContent='Day '+s.day;let entries=[['Energi',s.energy],['Lapar',s.hunger],['Mood',s.mood],['Kebersihan',s.clean],['Skill',s.skill]];document.getElementById('stats').innerHTML=entries.map(([n,v])=>'<div class="stat">'+n+'<b style="float:right">'+v+'/100</b><div class="meter"><div class="fill" style="width:'+Math.max(0,Math.min(100,v))+'%"></div></div></div>').join('');document.getElementById('inventory').textContent=s.inv.join(' • ')||'Kosong';}
+function clamp(){['energy','hunger','mood','clean','skill'].forEach(k=>s[k]=Math.max(0,Math.min(100,s[k])))}
+function visit(p){document.getElementById('placeInfo').textContent='Kamu sedang berada di '+p+'. Pilih aktivitas yang tersedia.';log('Mengunjungi '+p+'.');if(p==='Pasar'){if(s.cash>=15){s.cash-=15;s.inv.push('Snack');log('Membeli snack seharga 15 koin.')}else log('Uangmu belum cukup untuk belanja.')}if(p==='Kantor'&&s.job==='Belum bekerja'){s.job='Pekerja paruh waktu';log('Kamu mendapat pekerjaan paruh waktu.')}save()}
+function doAct(a){let msg='';if(a==='sleep'){s.energy+=35;s.mood+=8;s.hunger+=10;msg='Beristirahat di rumah. Energi pulih.'}if(a==='meal'){if(s.cash>=10){s.cash-=10;s.hunger-=30;s.mood+=5;msg='Makan makanan sederhana. (-10 koin)'}else msg='Uangmu tidak cukup untuk membeli makanan.'}if(a==='hobby'){s.energy-=12;s.mood+=18;msg='Menikmati waktu dengan hobi.'}if(a==='study'){s.energy-=18;s.hunger+=8;s.skill+=12;msg='Belajar meningkatkan skill.'}if(a==='work'){if(s.job==='Belum bekerja'){msg='Belum punya pekerjaan. Kunjungi kantor untuk mencari kerja.'}else if(s.energy>15){s.energy-=22;s.hunger+=12;s.cash+=45;s.skill+=3;msg='Selesai bekerja. Mendapat 45 koin.'}else msg='Energi terlalu rendah untuk bekerja.'}if(a==='social'){s.energy-=10;s.mood+=12;s.cash-=5;msg='Menghabiskan waktu bersama teman (5 koin).'}clamp();log(msg);save()}
+function nextDay(){s.day++;s.energy-=8;s.hunger+=12;s.clean-=8;s.mood-=4;if(s.hunger>85){s.energy-=10;s.mood-=10}clamp();log('Hari baru dimulai. Rutinitas dan kebutuhanmu berubah.');save()}
+function resetGame(){if(confirm('Mulai ulang dan hapus progres lokal?')){localStorage.removeItem('lifeSimChesskoi');s=null;location.reload()}}
+if(s){document.getElementById('setup').classList.add('hide');document.getElementById('game').classList.remove('hide');render();} 
+</script></body></html>
