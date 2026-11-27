@@ -147,3 +147,13 @@ const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.sc
  window.ageUp=function(){if(!s||s.dead)return;oldTurn();if(!s||s.dead)return;show();};
 })();
 </script>
+
+<script>
+/* Fix monthly turn UI and make school enrollment visible */
+(function(){
+ const renderBase=window.render;
+ window.render=function(){renderBase();if(!s)return;let ageEl=document.getElementById('age');if(ageEl)ageEl.textContent=(s.age||0)+' tahun '+(s.month||0)+' bulan';let meta=document.getElementById('meta');if(meta)meta.textContent=s.gender+' • '+s.city+' • '+s.education+' • Bulan '+(s.month||0);let summary=document.getElementById('summary');if(summary&&!s.dead)summary.textContent='Menjalani kehidupan • '+(s.month||0)+'/12 bulan menuju usia berikutnya.';let careerActions=document.getElementById('careerActions');if(careerActions&&s.age>=6&&s.age<18&&!s.schoolEnrolled){careerActions.innerHTML='<p>🎒 Kamu belum terdaftar di sekolah.</p><button class="btn" onclick="showSchoolChoices()">🏫 Pilih sekolah</button>';}else if(careerActions&&s.age>=6&&s.age<18&&s.schoolEnrolled){careerActions.innerHTML='<p>📚 '+s.education+' — '+(s.schoolName||'')+'</p><button class="btn" onclick="school()">Belajar di sekolah</button>';}let turnBtn=document.querySelector('#game button[onclick="ageUp()"]');if(turnBtn)turnBtn.textContent='⏳ Jalani bulan berikutnya';};
+ const prior=window.ageUp;
+ window.ageUp=function(){if(!s||s.dead)return;prior();if(s&&!s.dead){s.month=s.month||0;save();render();}};
+})();
+</script>
