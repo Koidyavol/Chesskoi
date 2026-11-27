@@ -189,3 +189,30 @@ const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.sc
  window.render=function(){oldRender();if(!s||!s.schoolEnrolled||!s.schoolName||s.age>=18)return;let box=document.getElementById('careerActions');if(!box)return;let peers=s.schoolNPCs&&s.schoolNPCs[s.schoolName];if(!peers)return;let last=peers.find(p=>p._lastWords);if(last){box.innerHTML+='<div class="event" style="border-left-color:#6ba8a0"><b>💬 '+last.name+' berkata:</b><p>'+last._lastWords+'</p><small>Balasan setelah: '+last._lastPlayerChoice+'</small></div>';}};
 })();
 </script>
+
+<script>
+/* School classmates are drawn from the existing resident NPC roster, not a separate generated roster */
+(function(){
+ function getPeers(){
+  if(!s||!s.schoolName||!Array.isArray(npcList))return [];
+  if(!s.schoolNPCs)s.schoolNPCs={};
+  let roster=s.schoolNPCs[s.schoolName];
+  if(!Array.isArray(roster)||roster._fromResidents!==true){
+   let eligible=npcList.filter(n=>n&&n.name&&n!==s&&(!n.age||Math.abs(n.age-s.age)<=3));
+   if(!eligible.length)eligible=npcList.filter(n=>n&&n.name);
+   roster=eligible.slice().sort(()=>Math.random()-.5).slice(0,6).map(n=>{
+    if(typeof n.friendship!=='number')n.friendship=0;
+    if(!n.relationship)n.relationship='Teman';
+    if(!n.stats)n.stats={};
+    if(!n.stats.personality)n.stats.personality=n.personality||'Belum diketahui';
+    return n;
+   });
+   roster._fromResidents=true;s.schoolNPCs[s.schoolName]=roster;
+  }
+  return roster;
+ }
+ window.talkSchoolNPC=function(i){let p=getPeers()[i];if(!p)return;let lines=['Hai! Apa kabar?','Kamu mau membahas sesuatu?','Ada kegiatan menarik hari ini?','Perlu bantuan?'];let opener=p.dialogue||p.greeting||lines[Math.floor(Math.random()*lines.length)];let box=document.getElementById('careerActions');box.innerHTML='<h4>💬 '+p.name+'</h4><div class="event"><b>'+p.name+':</b> '+opener+'</div><p>🤝 Pertemanan: '+p.friendship+'</p><p>Status: '+(p.relationship||'Teman')+'</p>'+['Sapa dengan ramah','Bicarakan pelajaran','Bercanda ringan','Tawarkan bantuan'].map((t,j)=>'<button class="choice" onclick="replySchoolNPC('+i+','+j+')">'+t+'</button>').join('')+'<button class="btn alt" onclick="render()">Kembali</button>';};
+ window.replySchoolNPC=function(i,j){let p=getPeers()[i];if(!p)return;let replies=['Dia membalas sapaan dengan ramah.','Dia membahas topik itu bersama kamu.','Dia menanggapi candaanmu.','Dia berterima kasih atas bantuanmu.'];let words=['ありがとう！','なるほどね！','ふふ、面白い！','助かったよ、ありがとう！'];p.friendship=Math.min(100,(p.friendship||0)+[3,4,3,5][j]);if(p.stats)p.stats.happiness=Math.min(100,(p.stats.happiness||60)+2);p._lastWords=words[j];p._lastPlayerChoice=['Sapa dengan ramah','Bicarakan pelajaran','Bercanda ringan','Tawarkan bantuan'][j];add('Percakapan','Berbicara dengan '+p.name+'. '+replies[j]+' (Pertemanan +'+[3,4,3,5][j]+')');save();render();};
+ const prevRender=window.render;window.render=function(){prevRender();if(!s||!s.schoolEnrolled||!s.schoolName||s.age>=18)return;let box=document.getElementById('careerActions');if(!box)return;let peers=getPeers();box.innerHTML+='<hr><h4>👥 Teman sekolah (warga yang sudah ada)</h4><div class="grid">'+peers.map((p,i)=>'<button class="choice" onclick="talkSchoolNPC('+i+')">'+p.name+'<small> • '+(p.stats?.personality||'NPC')+' • 🤝 '+(p.friendship||0)+'</small></button>').join('')+'</div>';let last=peers.find(p=>p._lastWords);if(last)box.innerHTML+='<div class="event"><b>💬 '+last.name+' berkata:</b><p>'+last._lastWords+'</p></div>';};
+})();
+</script>
