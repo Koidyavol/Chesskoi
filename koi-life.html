@@ -157,3 +157,11 @@ const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.sc
  window.ageUp=function(){if(!s||s.dead)return;prior();if(s&&!s.dead){s.month=s.month||0;save();render();}};
 })();
 </script>
+
+<script>
+/* Performance fix: avoid duplicate full render/save on every monthly turn */
+(function(){
+ const previous=window.ageUp;
+ window.ageUp=function(){if(!s||s.dead)return;previous();};
+})();
+</script>
