@@ -128,3 +128,22 @@ const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.sc
  window.activity=function(a){if(!s||s.dead)return;let monthKey=(s.age||0)*12+(s.month||0);if(s.lastActivityMonth===monthKey){add('Aktivitas','Kamu sudah melakukan aktivitas bulan ini. Jalani waktu berikutnya dulu agar bisa melakukan aktivitas lagi.');render();save();return;}if((s.energy||0)<12&&a!=='rest'){add('Aktivitas','Energi terlalu rendah. Istirahat dulu sebelum melakukan aktivitas lain.');render();save();return;}if(a==='study'&&s.intelligence>=95){add('Belajar','Kecerdasanmu sudah sangat tinggi. Fokus belajar sekarang memberi hasil yang lebih kecil.');render();save();return;}original(a);s.lastActivityMonth=monthKey;if(a==='study'&&s.intelligence>80)s.intelligence=Math.min(100,s.intelligence);render();save();};
 })();
 </script>
+
+<script>
+/* Choice-driven life event on every month turn */
+(function(){
+ const oldTurn=window.ageUp;
+ const eventPool=[
+ {q:'Teman mengajakmu ikut kegiatan akhir pekan. Apa yang kamu pilih?',opts:[['Ikut kegiatan', {happiness:6,energy:-5}],['Menolak dan beristirahat',{energy:8,happiness:1}],['Membantu mengatur kegiatan',{intelligence:2,happiness:4}]]},
+ {q:'Kamu menemukan kesempatan belajar keterampilan baru.',opts:[['Mencoba dengan tekun',{intelligence:4,energy:-6}],['Cari tahu dulu sebelum memutuskan',{intelligence:2,happiness:2}],['Lewati kesempatan',{energy:3}]]},
+ {q:'Keluarga mengajak menghabiskan waktu bersama.',opts:[['Setuju',{happiness:7,energy:2}],['Minta waktu untuk kegiatan sendiri',{happiness:1,energy:3}],['Bantu menyiapkan acara',{happiness:5,energy:-3}]]},
+ {q:'Ada seseorang yang membutuhkan bantuan kecil.',opts:[['Bantu sebisamu',{happiness:5,energy:-4}],['Sarankan cara menyelesaikannya',{intelligence:2,happiness:2}],['Tolak dengan sopan',{energy:2}]]},
+ {q:'Kamu punya waktu luang. Bagaimana menggunakannya?',opts:[['Membaca atau belajar',{intelligence:3,energy:-3}],['Menikmati hobi',{happiness:5}],['Beristirahat',{energy:8}]]},
+ {q:'Pengeluaran kecil tak terduga muncul.',opts:[['Bayar dari tabungan',{money:-10,happiness:1}],['Cari alternatif hemat',{intelligence:2,money:-3}],['Tunda jika memungkinkan',{happiness:-2}]]}
+ ];
+ let pending=null;
+ function show(){if(!s||s.dead)return;let ev=eventPool[Math.floor(Math.random()*eventPool.length)];pending=ev;let modal=document.getElementById('koiTurnEvent');if(!modal){modal=document.createElement('div');modal.id='koiTurnEvent';modal.className='modal';modal.style.zIndex='120';modal.innerHTML='<div class="modalBox"><h2>🎲 Peristiwa Bulan Ini</h2><div id="koiEventBubble" class="event" style="font-size:16px"></div><div id="koiEventChoices"></div></div>';document.body.appendChild(modal);}modal.style.display='flex';document.getElementById('koiEventBubble').textContent=ev.q;document.getElementById('koiEventChoices').innerHTML=ev.opts.map((o,i)=>'<button class="choice" onclick="window.chooseKoiTurnEvent('+i+')">'+o[0]+'</button>').join('');}
+ window.chooseKoiTurnEvent=function(i){if(!pending)return;let effects=pending.opts[i][1],summary=[];Object.keys(effects).forEach(k=>{if(typeof s[k]==='number'){s[k]=Math.max(0,Math.min(k==='money'?999999:100,s[k]+effects[k]));summary.push((k==='money'?'Koin':k==='energy'?'Energi':k==='intelligence'?'Kecerdasan':'Kebahagiaan')+' '+(effects[k]>0?'+':'')+effects[k]);}});add('Pilihan peristiwa',pending.opts[i][0]+'. '+summary.join(', '));pending=null;document.getElementById('koiTurnEvent').style.display='none';clamp();render();save();};
+ window.ageUp=function(){if(!s||s.dead)return;oldTurn();if(!s||s.dead)return;show();};
+})();
+</script>
