@@ -225,3 +225,30 @@ const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.sc
  window.talkResident=function(i,j){let n=npcList[i];if(!n)return;if(typeof n.friendship!=='number')n.friendship=0;let gains=[3,2,3,4];n.friendship=Math.min(100,n.friendship+gains[j]);let responses=['Dia menyambut sapaan dan menjawab dengan ramah.','Dia menceritakan sedikit tentang kesehariannya.','Obrolan kalian berlanjut membahas hal yang menarik.','Dia menghargai tawaran bantuanmu.'];let options=['Hai! Apa kabar?','Kegiatan sehari-hari cukup menarik, ya.','Aku suka membahas hal-hal seperti ini.','Terima kasih sudah berbincang!'];n._talkText=responses[j];n._talkPlayer=options[j];add('Percakapan','Kamu berbincang dengan '+n.name+'. Pertemanan +'+gains[j]+'.');save();showNPC(i);};
 })();
 </script>
+
+<script>
+/* Indonesian dialogue text for NPC conversations */
+(function(){
+ const plainReplies=[
+  ['Hai! Senang bertemu denganmu.','Oh, begitu! Cerita yang menarik.','Hehe, kamu lucu juga.','Terima kasih, aku menghargainya.'],
+  ['Aku baik, terima kasih sudah bertanya.','Hari ini cukup sibuk, tapi menyenangkan.','Wah, aku belum pernah memikirkan itu.','Terima kasih atas perhatianmu.'],
+  ['Senang bisa ngobrol sebentar.','Aku juga tertarik dengan hal itu.','Haha, itu membuat suasana jadi ceria.','Kamu baik sekali.']
+ ];
+ window.replySchoolNPC=function(i,j){
+  if(!s||!s.schoolNPCs||!s.schoolName)return;
+  let p=s.schoolNPCs[s.schoolName][i];if(!p)return;
+  let gain=[3,4,3,5][j]||3;p.friendship=Math.min(100,(p.friendship||0)+gain);
+  if(p.stats)p.stats.happiness=Math.min(100,(p.stats.happiness||60)+2);
+  p._lastWords=plainReplies[Math.floor(Math.random()*plainReplies.length)][j]||'Terima kasih!';
+  p._lastPlayerChoice=['Sapa dengan ramah','Bicarakan pelajaran','Bercanda ringan','Tawarkan bantuan'][j]||'Berbicara';
+  add('Percakapan','Berbicara dengan '+p.name+'. Pertemanan +'+gain+'.');save();render();
+ };
+ window.talkResident=function(i,j){
+  let n=npcList[i];if(!n)return;if(typeof n.friendship!=='number')n.friendship=0;
+  let gains=[3,2,3,4];n.friendship=Math.min(100,n.friendship+gains[j]);
+  let replies=['Dia menyambut sapaanmu dengan ramah.','Dia menceritakan kesehariannya.','Obrolan kalian membahas hal menarik.','Dia menghargai tawaran bantuanmu.'];
+  n._talkText=replies[j]||replies[0];n._talkPlayer=['Hai! Apa kabar?','Bagaimana kegiatanmu hari ini?','Aku suka ngobrol tentang hal menarik.','Kalau perlu bantuan, bilang saja.'][j]||'Sapaan ramah';
+  add('Percakapan','Kamu berbincang dengan '+n.name+'. Pertemanan +'+gains[j]+'.');save();window.showNPC(i);
+ };
+})();
+</script>
