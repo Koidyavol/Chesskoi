@@ -165,3 +165,27 @@ const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.sc
  window.ageUp=function(){if(!s||s.dead)return;previous();};
 })();
 </script>
+
+<script>
+/* Conversation follow-up: show a contextual NPC spoken reply after each player response */
+(function(){
+ const replyTexts={
+ '山田葵':['そうだね、ありがとう！','なるほど、いい考えだね。','ふふ、面白いね。','助かったよ、ありがとう！'],
+ '鈴木蓮':['いいね、話せてよかった。','一緒に考えてみよう。','はは、それは面白い！','ありがとう、助かるよ。'],
+ '高橋結衣':['うん、嬉しいな！','それ、私も気になってた。','ふふっ、笑っちゃった。','ありがとう、優しいね。'],
+ '伊藤悠真':['そうだね、また話そう。','一緒にやると分かりやすいね。','はは、確かに！','ありがとう、頼りになるね。'],
+ '渡辺美月':['嬉しい、ありがとう。','いい話題だね！','ふふ、楽しいね。','本当に助かったよ。'],
+ '中村陽菜':['また話しかけてね！','なるほど、そういう考えもあるね。','えへへ、面白い！','ありがとう、心強いよ。'],
+ '小林湊':['おう、また話そうぜ。','一緒に確認してみよう。','はは、いいね！','ありがとな！'],
+ '加藤凛':['ありがとう、嬉しいです。','その考え、参考になります。','ふふ、和みますね。','助かりました、ありがとう。'],
+ '吉田颯太':['よし、また話そう！','一緒に頑張ろうぜ。','ははは、最高！','ありがとう、助かった！'],
+ '山本紬':['ありがとう、嬉しいです。','素敵な rekomendasi… eh, ideですね。','ふふ、思わず笑いました。','本当にありがとう。'],
+ '松本莉子':['またお話ししようね！','いいアイデアかも！','ふふっ、面白いね。','ありがとう、助かったよ。']
+ };
+ const oldReply=window.replySchoolNPC;
+ if(typeof oldReply!=='function')return;
+ window.replySchoolNPC=function(i,j){oldReply(i,j);if(!s||!s.schoolNPCs||!s.schoolName)return;let p=s.schoolNPCs[s.schoolName][i];if(!p)return;p._lastWords=(replyTexts[p.name]||['ありがとう！','なるほどね。','ふふ、面白いね。','助かったよ！'])[j]||'ありがとう！';p._lastPlayerChoice=['Sapa dengan ramah','Bicarakan pelajaran','Bercanda ringan','Tawarkan bantuan'][j]||'Berbicara';save();render();};
+ const oldRender=window.render;
+ window.render=function(){oldRender();if(!s||!s.schoolEnrolled||!s.schoolName||s.age>=18)return;let box=document.getElementById('careerActions');if(!box)return;let peers=s.schoolNPCs&&s.schoolNPCs[s.schoolName];if(!peers)return;let last=peers.find(p=>p._lastWords);if(last){box.innerHTML+='<div class="event" style="border-left-color:#6ba8a0"><b>💬 '+last.name+' berkata:</b><p>'+last._lastWords+'</p><small>Balasan setelah: '+last._lastPlayerChoice+'</small></div>';}};
+})();
+</script>
