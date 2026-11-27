@@ -96,3 +96,14 @@ window.chooseSchool=function(i){let choices=s.age<13?['SD Negeri Sakura','SD Har
 window.school=function(){if(s.age<6){add('Sekolah','Belum cukup usia untuk mulai sekolah.');save();return;}if(s.age>=18){add('Pendidikan','Masa sekolah selesai.');save();return;}if(!s.schoolEnrolled){showSchoolChoices();return;}s.intelligence+=5;s.happiness+=3;s.energy-=10;add('Sekolah','Mengikuti pelajaran di '+(s.schoolName||s.education)+'. Kecerdasan meningkat.');clamp();save();render();};
 })();
 </script>
+
+<script>
+/* School-specific NPC classmates */
+(function(){
+const schoolPeers={};
+const names=['山田葵','鈴木蓮','高橋結衣','伊藤悠真','渡辺美月','中村陽菜','小林湊','加藤凛','吉田颯太','山本紬','佐々木大翔','松本莉子'];
+window.chooseSchool=function(i){let choices=s.age<13?['SD Negeri Sakura','SD Harapan','SD Cendekia']:s.age<16?['SMP Negeri Sakura','SMP Harapan','SMP Cendekia']:['SMA Negeri Sakura','SMK Sakura Teknik','SMA Harapan'];if(i<0||i>=choices.length)return;s.schoolName=choices[i];s.schoolEnrolled=true;s.schoolGrade=1;s.education=(s.age<13?'SD kelas 1':s.age<16?'SMP kelas 1':'SMA/SMK kelas 1')+' — '+s.schoolName;if(!schoolPeers[s.schoolName])schoolPeers[s.schoolName]=names.slice().sort(()=>Math.random()-.5).slice(0,6).map((name,k)=>({name,age:s.age,role:'Teman sekolah • '+s.schoolName,school:s.schoolName,stats:{happiness:60+Math.floor(Math.random()*35),intelligence:40+Math.floor(Math.random()*45),personality:['Ramah','Pendiam','Ceria','Rajin','Santai'][Math.floor(Math.random()*5)]},img:npcList[k%npcList.length]?.img||''}));add('Pendaftaran sekolah','Kamu memilih '+s.schoolName+' dan mulai '+s.education+'. Teman sekelas baru tersedia.');render();save();};
+window.showSchoolPeer=function(i){let p=schoolPeers[s.schoolName]?.[i];if(!p)return;let el=document.getElementById('careerActions');el.innerHTML='<h4>Profil teman sekolah</h4><p><b>'+p.name+'</b></p><p>'+p.role+'</p><p>Umur: '+p.age+' tahun</p><p>Kepribadian: '+p.stats.personality+'</p><p>Kecerdasan: '+p.stats.intelligence+'</p><p>Kebahagiaan: '+p.stats.happiness+'</p><button class="btn alt" onclick="render()">Kembali</button>';};
+const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.schoolName||s.age>=18)return;let box=document.getElementById('careerActions');if(!box)return;box.innerHTML+='<hr><h4>👥 Teman sekolah — '+s.schoolName+'</h4><div class="grid">'+(schoolPeers[s.schoolName]||[]).map((p,i)=>'<button class="choice" onclick="showSchoolPeer('+i+')">'+p.name+'<small> • '+p.stats.personality+'</small></button>').join('')+'</div>';};
+})();
+</script>
