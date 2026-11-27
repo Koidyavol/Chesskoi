@@ -252,3 +252,28 @@ const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.sc
  };
 })();
 </script>
+
+<script>
+/* One interaction (including talking) per monthly turn */
+(function(){
+ function monthKey(){return (s.age||0)*12+(s.month||0);}
+ const priorActivity=window.activity;
+ window.activity=function(a){
+  if(!s||s.dead)return;
+  if(s.lastActivityMonth===monthKey()){add('Aktivitas','Batas aktivitas bulan ini sudah digunakan. Jalani bulan berikutnya dulu.');render();save();return;}
+  priorActivity(a);
+ };
+ const priorTalk=window.talkResident;
+ window.talkResident=function(i,j){
+  if(!s||s.dead)return;
+  if(s.lastTalkMonth===monthKey()){add('Percakapan','Kamu sudah berbicara dengan warga bulan ini. Jalani bulan berikutnya dulu.');render();save();return;}
+  priorTalk(i,j);s.lastTalkMonth=monthKey();save();
+ };
+ const priorSchoolTalk=window.replySchoolNPC;
+ window.replySchoolNPC=function(i,j){
+  if(!s||s.dead)return;
+  if(s.lastTalkMonth===monthKey()){add('Percakapan','Kamu sudah berbicara bulan ini. Jalani bulan berikutnya dulu.');render();save();return;}
+  priorSchoolTalk(i,j);s.lastTalkMonth=monthKey();save();
+ };
+})();
+</script>
