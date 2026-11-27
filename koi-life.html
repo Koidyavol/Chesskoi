@@ -120,3 +120,11 @@ window.replySchoolNPC=function(i,j){ensure();let p=s.schoolNPCs[s.schoolName]?.[
 const oldRender=render;render=function(){oldRender();if(!s.schoolEnrolled||!s.schoolName||s.age>=18)return;ensure();let box=document.getElementById('careerActions');if(!box)return;box.innerHTML+='<hr><h4>👥 Teman sekolah — '+s.schoolName+'</h4><div class="grid">'+s.schoolNPCs[s.schoolName].map((p,i)=>'<button class="choice" onclick="talkSchoolNPC('+i+')">'+p.name+'<small> • '+p.stats.personality+' • 🤝 '+p.friendship+'</small></button>').join('')+'</div>';};
 })();
 </script>
+
+<script>
+/* Activity limits: one meaningful activity per simulated month, energy gating and diminishing study gains */
+(function(){
+ const original=window.activity;
+ window.activity=function(a){if(!s||s.dead)return;let monthKey=(s.age||0)*12+(s.month||0);if(s.lastActivityMonth===monthKey){add('Aktivitas','Kamu sudah melakukan aktivitas bulan ini. Jalani waktu berikutnya dulu agar bisa melakukan aktivitas lagi.');render();save();return;}if((s.energy||0)<12&&a!=='rest'){add('Aktivitas','Energi terlalu rendah. Istirahat dulu sebelum melakukan aktivitas lain.');render();save();return;}if(a==='study'&&s.intelligence>=95){add('Belajar','Kecerdasanmu sudah sangat tinggi. Fokus belajar sekarang memberi hasil yang lebih kecil.');render();save();return;}original(a);s.lastActivityMonth=monthKey;if(a==='study'&&s.intelligence>80)s.intelligence=Math.min(100,s.intelligence);render();save();};
+})();
+</script>
