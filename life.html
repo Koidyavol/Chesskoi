@@ -14,7 +14,10 @@
 <div class="panel"><h3>📜 Riwayat</h3><div id="log" class="log"></div></div>
 <button class="btn" onclick="ageUp()">⏳ Jalani tahun berikutnya</button><button class="btn alt" onclick="resetGame()">Mulai hidup baru</button></section></div>
 <script>
-const key='koiLifeBitStyle';\nlet s=null;\ntry{s=JSON.parse(localStorage.getItem(key)||'null')}catch(e){s=null;try{localStorage.removeItem(key)}catch(_){}}\nif(s && (!s.family || !Array.isArray(s.history) || typeof s.age!=='number')){s=null;try{localStorage.removeItem(key)}catch(_){}}
+const key='koiLifeBitStyle';
+let s=null;
+try{s=JSON.parse(localStorage.getItem(key)||'null')}catch(e){s=null;try{localStorage.removeItem(key)}catch(_){}}
+if(s && (!s.family || !Array.isArray(s.history) || typeof s.age!=='number')){s=null;try{localStorage.removeItem(key)}catch(_){}}
 const events={
 child:['Hari sekolah: seorang teman mengajak bermain.','Kamu menemukan buku menarik di perpustakaan.','Keluarga menghabiskan akhir pekan bersama.','Ada kegiatan kelas yang seru.'],
 teen:['Ada klub sekolah yang membuka pendaftaran.','Tugas sekolah menumpuk, kamu perlu mengatur waktu.','Teman mengajak ikut kegiatan setelah sekolah.','Kamu mulai menemukan minat baru.'],
